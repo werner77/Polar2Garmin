@@ -1,13 +1,6 @@
 #!/bin/sh
 
-polar_username="<your polar user>"
-polar_password="<your polar password>"
-garmin_username="<your garmin user>"
-garmin_password="<your garmin password>"
-age="<age in years>"
-weight="<weight in kg>"
-gender="<MALE or FEMALE>"
-timezone="<TIMEZONE, for example CET>"
+source sync.env
 
 tmpdir="./tmp"
 gpxdir="./polar"
@@ -55,6 +48,18 @@ if [ ! -f done/${tcxfile} ]; then
     echo "Uploading activity from file ${tcxfile}"
 
     [[ $(gupload.py -l ${garmin_username} ${garmin_password} ${tcxfile}) =~ "SUCCESS" ]] && mv ${tcxfile} done
+
+    if [ "${strava_token" != "" ]; then  
+
+    	echo "Uploading activity to Strava"
+
+    	curl -X POST https://www.strava.com/api/v3/uploads \
+    	-H "Authorization: Bearer ${strava_token}" \
+    	-F file=@done/${tcxfile} \
+    	-F data_type=tcx
+
+    fi
+
 else
 
     echo "Activity from file ${tcxfile} was already uploaded"
